@@ -1,8 +1,8 @@
-package admin;
+package admin.View;
 
 import javax.swing.JPanel;
 
-public class Account extends JPanel {
+public class Order extends JPanel {
         //dựng layout ở đây nhé ko cần phải dựng cửa sổ window chỉ cần đi thẳng vào layout
 
 }
