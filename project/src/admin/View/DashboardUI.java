@@ -1,4 +1,4 @@
-package admin;
+package admin.View;
 import javax.swing.*;
 import java.awt.*;
 import java.net.URL; // Cần import
@@ -8,7 +8,6 @@ public class DashboardUI extends JFrame {
     private CardLayout cardLayout;
     private JPanel mainPanel;
     
-    // Khai báo kích thước icon mong muốn
     private final int ICON_WIDTH = 16;
     private final int ICON_HEIGHT = 16;
 
@@ -40,7 +39,7 @@ public class DashboardUI extends JFrame {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        mainPanel.add(new Computer(), "computers");
+        mainPanel.add(new Computer(this), "computers");
         mainPanel.add(new Account(), "accounts");
         mainPanel.add(new Order(), "orders");
         mainPanel.add(new Static(), "statics");
@@ -71,11 +70,13 @@ public class DashboardUI extends JFrame {
 
         @Override
         public void mouseEntered(java.awt.event.MouseEvent e) {
+            panel.setBackground(new Color(33, 37, 41));
             panel.setCursor(new Cursor(Cursor.HAND_CURSOR));
         }
 
         @Override
         public void mouseExited(java.awt.event.MouseEvent e) {
+
             panel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
         }
 });
