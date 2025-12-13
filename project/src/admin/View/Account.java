@@ -3,207 +3,216 @@ package admin.View;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 public class Account extends JPanel {
 
-    // ====================== CONSTANTS ======================
-    private static final Color BG_MAIN = new Color(245, 245, 245);
-    private static final Font FONT_NORMAL = new Font("Segoe UI", Font.PLAIN, 12);
-    private static final Font FONT_BOLD = new Font("Segoe UI", Font.BOLD, 12);
-    private static final Font FONT_TITLE = new Font("Segoe UI", Font.BOLD, 20);
+    private static final Color BG = new Color(245, 245, 245);
+    private static final Font FN = new Font("Segoe UI", Font.PLAIN, 12);
+    private static final Font FB = new Font("Segoe UI", Font.BOLD, 12);
+    private static final Font FT = new Font("Segoe UI", Font.BOLD, 20);
 
-    private static final int ICON_WIDTH = 16;
-    private static final int ICON_HEIGHT = 16;
-
-    // ====================== COMPONENTS ======================
-    private JTable accountTable;
-    private DefaultTableModel tableModel;
-    private JTextField searchField;
+    private JTable table;
+    private DefaultTableModel model;
+    private Timer timer;
 
     public Account() {
         setLayout(new BorderLayout(10, 10));
-        setBackground(BG_MAIN);
+        setBackground(BG);
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        add(createHeaderPanel(), BorderLayout.NORTH);
-        add(createTablePanel(), BorderLayout.CENTER);
-        add(createButtonPanel(), BorderLayout.SOUTH);
+        add(header(), BorderLayout.NORTH);
+        add(tablePanel(), BorderLayout.CENTER);
+        add(buttonPanel(), BorderLayout.SOUTH);
+
+        startTimer();
     }
 
-    // ====================== HEADER ======================
-    private JPanel createHeaderPanel() {
-        JPanel header = new JPanel(new BorderLayout(10, 10));
-        header.setBackground(BG_MAIN);
+    // ================= HEADER =================
+    private JPanel header() {
+        JPanel p = new JPanel(new BorderLayout());
+        p.setBackground(BG);
 
         JLabel title = new JLabel("Quản Lý Tài Khoản Người Dùng");
-        title.setFont(FONT_TITLE);
-        title.setForeground(new Color(33, 33, 33));
-        header.add(title, BorderLayout.WEST);
+        title.setFont(FT);
+        p.add(title, BorderLayout.WEST);
 
-        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
-        searchPanel.setBackground(BG_MAIN);
-
-        searchPanel.add(new JLabel("Tìm kiếm:"));
-        searchField = new JTextField(20);
-        searchField.setFont(FONT_NORMAL);
-        searchField.setPreferredSize(new Dimension(200, 35));
-
-        searchPanel.add(searchField);
-        header.add(searchPanel, BorderLayout.EAST);
-
-        return header;
+        return p;
     }
 
-    // ====================== TABLE ======================
-    private JPanel createTablePanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
+    // ================= TABLE =================
+    private JPanel tablePanel() {
+        JPanel p = new JPanel(new BorderLayout());
+        p.setBackground(Color.WHITE);
 
-        String[] cols = {"STT", "Tài khoản","Mật khẩu", "Thời gian còn lại",  "Thời gian tạo"};
+        String[] cols = {"STT", "Tài khoản", "Mật khẩu", "Thời gian còn lại", "Thời gian tạo"};
+        model = new DefaultTableModel(cols, 0){ @Override public boolean isCellEditable(int r,int c){ return false; }};
 
-        tableModel = new DefaultTableModel(cols, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
-        };
+        table = new JTable(model);
+        table.setFont(FN);
+        table.setRowHeight(30);
+        styleHeader();
 
-        accountTable = new JTable(tableModel);
-        accountTable.setFont(FONT_NORMAL);
-        accountTable.setRowHeight(30);
-        accountTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-        JTableHeaderStyle(accountTable);
-
-        panel.add(new JScrollPane(accountTable), BorderLayout.CENTER);
-        return panel;
+        p.add(new JScrollPane(table), BorderLayout.CENTER);
+        return p;
     }
 
-    private void JTableHeaderStyle(JTable table) {
-        table.getTableHeader().setFont(FONT_BOLD);
-        table.getTableHeader().setBackground(new Color(70, 130, 180));
+    private void styleHeader() {
+        table.getTableHeader().setFont(FB);
+        table.getTableHeader().setBackground(new Color(70,130,180));
         table.getTableHeader().setForeground(Color.WHITE);
-        table.setGridColor(new Color(220, 220, 220));
-        table.setShowGrid(true);
+        table.setGridColor(new Color(220,220,220));
     }
 
-    // ====================== BUTTON PANEL ======================
-    private JPanel createButtonPanel() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
-        panel.setBackground(BG_MAIN);
+    // ================= BUTTONS =================
+    private JPanel buttonPanel() {
+        JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        p.setBackground(BG);
 
-        panel.add(createButton("THÊM MỚI", new Color(52, 152, 219), "/img/add.png", e -> handleAdd()));
-        panel.add(createButton("CHỈNH SỬA", new Color(46, 204, 113), "/img/edit.png", e -> handleEdit()));
-        panel.add(createButton("XÓA", new Color(231, 76, 60), "/img/delete.png", e -> handleDelete()));
-        panel.add(createButton("LÀM MỚI", new Color(155, 89, 182), "/img/refresh.png", e -> handleRefresh()));
+        p.add(btn("THÊM", new Color(52,152,219), "/img/add.png", e -> addAcc()));
+        p.add(btn("SỬA", new Color(46,204,113), "/img/edit.png", e -> editAcc()));
+        p.add(btn("XÓA", new Color(231,76,60), "/img/delete.png", e -> deleteAcc()));
+        p.add(btn("LÀM MỚI", new Color(155,89,182), "/img/refresh.png", e -> refreshAcc()));
 
-        return panel;
+        return p;
     }
 
-    // Tạo button nhanh
-    private JButton createButton(String text, Color color, String iconPath, java.awt.event.ActionListener action) {
-        JButton btn = new JButton(text, loadIcon(iconPath));
-        btn.setFont(FONT_BOLD);
-        btn.setForeground(Color.WHITE);
-        btn.setBackground(color);
-        btn.setPreferredSize(new Dimension(140, 40));
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setIconTextGap(8);
-        btn.setHorizontalTextPosition(SwingConstants.RIGHT);
+    private JButton btn(String text, Color color, String icon, java.awt.event.ActionListener ac) {
+        JButton b = new JButton(text, loadIcon(icon));
+        b.setFont(FB);
+        b.setBackground(color);
+        b.setForeground(Color.WHITE);
+        b.setPreferredSize(new Dimension(130, 40));
+        b.setBorderPainted(false);
+        b.setFocusPainted(false);
+        b.addActionListener(ac);
 
-        // Hover effect
-        btn.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override public void mouseEntered(java.awt.event.MouseEvent e) { btn.setBackground(color.darker()); }
-            @Override public void mouseExited(java.awt.event.MouseEvent e) { btn.setBackground(color); }
+        b.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) { b.setBackground(color.darker()); }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) { b.setBackground(color); }
         });
-
-        btn.addActionListener(action);
-        return btn;
+        return b;
     }
 
-    // ====================== ICON LOADER ======================
-    private ImageIcon loadIcon(String path) {
+    // =============== ICON ===============
+    private ImageIcon loadIcon(String path){
         try {
             var res = getClass().getResource(path);
-            if (res == null) return null;
-
+            if(res == null) return null;
             BufferedImage img = ImageIO.read(res);
-            Image scaled = img.getScaledInstance(ICON_WIDTH, ICON_HEIGHT, Image.SCALE_SMOOTH);
-            return new ImageIcon(scaled);
-
-        } catch (IOException ex) {
-            System.err.println("Không thể load icon: " + path);
-            return null;
-        }
+            return new ImageIcon(img.getScaledInstance(16, 16, Image.SCALE_SMOOTH));
+        } catch(IOException e){ return null; }
     }
 
-    // ====================== EVENT HANDLERS ======================
-    private void handleAdd() {
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        String now = LocalDateTime.now().format(fmt);
-
+    // ================= EVENTS =================
+    private void addAcc() {
+        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
         AccountForm form = new AccountForm(SwingUtilities.getWindowAncestor(this), "Thêm tài khoản", true,
-                "", "", "", now);
+                "", "", now);
 
-        if (form.showDialog()) {
-            int stt = tableModel.getRowCount() + 1;
-            tableModel.addRow(new Object[]{stt, form.getUsername(), form.getPassword(), form.getRemainingTime(), form.getCreatedAt()});
-            JOptionPane.showMessageDialog(this, "Thêm thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        if(form.showDialog()){
+            long sec = form.getHours() * 3600;
+            model.addRow(new Object[]{
+                    model.getRowCount() + 1,
+                    form.getUsername(),
+                    form.getPassword(),
+                    format(sec),
+                    form.getCreatedAt()
+            });
         }
     }
 
-    private void handleEdit() {
-        int row = accountTable.getSelectedRow();
-        if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn tài khoản!",
-                    "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+    private void editAcc() {
+        int r = table.getSelectedRow();
+        if(r < 0){
+            msg("Vui lòng chọn tài khoản!");
             return;
         }
 
-        String username = String.valueOf(tableModel.getValueAt(row, 1));
-        String password = String.valueOf(tableModel.getValueAt(row, 2));
-        String remaining = String.valueOf(tableModel.getValueAt(row, 3));
-        String created = String.valueOf(tableModel.getValueAt(row, 4));
+        AccountForm form = new AccountForm(
+                SwingUtilities.getWindowAncestor(this),
+                "Chỉnh sửa tài khoản",
+                true,
+                model.getValueAt(r,1).toString(),
+                model.getValueAt(r,2).toString(),
+                model.getValueAt(r,4).toString()
+        );
 
-        AccountForm form = new AccountForm(SwingUtilities.getWindowAncestor(this), "Chỉnh sửa tài khoản", true,
-                username, password, remaining, created);
+        if(form.showDialog()){
+            model.setValueAt(form.getUsername(), r, 1);
+            model.setValueAt(form.getPassword(), r, 2);
 
-        if (form.showDialog()) {
-            tableModel.setValueAt(form.getUsername(), row, 1);
-            tableModel.setValueAt(form.getPassword(), row, 2);
-            tableModel.setValueAt(form.getRemainingTime(), row, 3);
-            tableModel.setValueAt(form.getCreatedAt(), row, 4);
-            JOptionPane.showMessageDialog(this, "Cập nhật thành công", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            long old = toSec(model.getValueAt(r,3).toString());
+            long added = form.getHours() * 3600;
+            model.setValueAt(format(old + added), r, 3);
         }
     }
 
-    private void handleDelete() {
-        int row = accountTable.getSelectedRow();
-        if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn tài khoản để xóa",
-                    "Cảnh báo", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
+    private void deleteAcc(){
+        int r = table.getSelectedRow();
+        if(r < 0){ msg("Vui lòng chọn tài khoản!"); return; }
 
-        if (JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa?",
-                "Xác nhận", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-
-            tableModel.removeRow(row);
-            JOptionPane.showMessageDialog(this, "Xóa thành công");
+        if(JOptionPane.showConfirmDialog(this,"Xóa tài khoản?","Xác nhận",
+                JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION){
+            model.removeRow(r);
         }
     }
 
-    private void handleRefresh() {
-        tableModel.setRowCount(0);
-        loadAccountsFromDatabase();
+    private void refreshAcc() {
+        model.setRowCount(0);
+        // TODO: load DB
     }
 
-    private void loadAccountsFromDatabase() {
-        // TODO: Load database
+    private void msg(String m){ JOptionPane.showMessageDialog(this, m); }
+
+    // ================= TIMER =================
+    private void startTimer() {
+        timer = new Timer(true);
+        timer.scheduleAtFixedRate(new TimerTask(){
+            @Override public void run(){ countdown(); }
+        },1000,1000);
+    }
+
+    private void countdown(){
+    SwingUtilities.invokeLater(() -> {
+        for(int i = 0; i < model.getRowCount(); i++){
+            long sec = toSec(model.getValueAt(i,3).toString());
+            if(sec > 0){
+                model.setValueAt(format(sec - 1), i, 3);
+            }else{
+                model.setValueAt("Hết giờ", i, 3); // ✅ KHÔNG XÓA
+            }
+        }
+    });
+}
+
+
+    // ================= UTIL =================
+    private long toSec(String t) {
+        try {
+            String[] p = t.split(":");
+            return Long.parseLong(p[0]) * 3600 +
+                   Long.parseLong(p[1]) * 60 +
+                   Long.parseLong(p[2]);
+        } catch(Exception e){ return 0; }
+    }
+
+    private String format(long sec){
+        long h = sec / 3600;
+        long m = (sec % 3600) / 60;
+        long s = sec % 60;
+        return String.format("%02d:%02d:%02d", h, m, s);
+    }
+
+    public void stopTimer(){
+        if(timer != null) timer.cancel();
     }
 }

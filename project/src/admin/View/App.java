@@ -1,4 +1,4 @@
-package admin.View; // Giả sử DashboardUI và servercontrol đều ở đây
+package admin.View; 
 import javax.swing.SwingUtilities;
 
 public class App {
