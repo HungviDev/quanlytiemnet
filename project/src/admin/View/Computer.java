@@ -177,7 +177,7 @@ public class Computer extends JPanel  {
         } else if (status.toLowerCase().contains("rảnh")) {
             return new Color(23, 162, 184); // Xanh dương
         } else {
-            return Color.GRAY; // Mặc định
+            return Color.GRAY;
         }
     }
 
