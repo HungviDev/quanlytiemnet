@@ -1,9 +1,8 @@
 package admin.Controller;
 
 import java.util.ArrayList;
-
-
 import admin.Model.computer;
+
 
 public class computerDAO {
     public computerDAO() {

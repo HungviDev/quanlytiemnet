@@ -1,4 +1,4 @@
-package admin.Model;
+package admin.Model;    
 
 public class computer {
     private String id;
