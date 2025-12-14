@@ -1,4 +1,4 @@
-package user;
+package user.View;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -245,7 +245,6 @@ class GradientPanel extends JPanel {
     private ArrayList<Product> getFakeProducts() {
 
         ArrayList<Product> list = new ArrayList<>();
-
         list.add(new Product("Coca", 15000, "img/coca.png"));
         list.add(new Product("Pepsi", 15000, "img/pepsi.png"));
         list.add(new Product("7up", 15000, "img/7up.png"));

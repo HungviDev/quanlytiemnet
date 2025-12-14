@@ -1,4 +1,4 @@
-package admin.Controller;
+package admin.DAO;
 
 import java.util.ArrayList;
 import admin.Model.computer;

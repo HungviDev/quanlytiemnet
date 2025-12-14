@@ -1,31 +1,26 @@
-package user;
+package user.View;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
-import java.io.IOException;
-
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
 public class HomeUser extends JFrame {
 
-    // =IMPORANT= ĐỊNH NGHĨA MÀU SẮC CHỦ ĐẠO (Gradient Xanh Tím)
-    // Màu bắt đầu (Tím sáng hơn)
+
     private static final Color GRADIENT_START = new Color(135, 88, 255);
     // Màu kết thúc (Xanh đậm hơn)
     private static final Color GRADIENT_END = new Color(66, 95, 235);
-    // Màu nền chính (Off-white để làm nổi bật nội dung)
     private static final Color BG_COLOR = new Color(255, 251, 236);
-   
+
 
     private JLabel lblOnlineTime, lblRemainingTime;
     private JTabbedPane tabs;
 
     public HomeUser() {
-        connectserver();
         setTitle("Home User");
         setSize(1200, 700); // Tăng chiều cao một chút cho thoáng
         setLocationRelativeTo(null);
@@ -43,7 +38,6 @@ public class HomeUser extends JFrame {
         });
         
         // Tùy chỉnh một chút cho JTabbedPane trông hiện đại hơn (nếu dùng thư viện ngoài như FlatLaf sẽ đẹp hơn)
-                // If you don't have a Login class, please comment out this line.
         UIManager.put("TabbedPane.selected", Color.WHITE);
         UIManager.put("TabbedPane.contentBorderInsets", new Insets(0,0,0,0));
         
@@ -120,9 +114,9 @@ public class HomeUser extends JFrame {
 
         // ========== GRID DỊCH VỤ ==========
         // Sử dụng 5 cột như cũ
-            JPanel grid = new JPanel(new GridLayout(0, 5, 20, 20));
-            grid.setBackground(BG_COLOR); // Nền đồng bộ
-            grid.setBorder(BorderFactory.createEmptyBorder(25, 25, 25, 25));
+        JPanel grid = new JPanel(new GridLayout(0, 5, 20, 20));
+        grid.setBackground(BG_COLOR); // Nền đồng bộ
+        grid.setBorder(BorderFactory.createEmptyBorder(25, 25, 25, 25));
 
         for (int i = 1; i <= 18; i++) {
             grid.add(createGridServiceCard("Dịch vụ " + i));
@@ -187,7 +181,6 @@ public class HomeUser extends JFrame {
         btnSend.addActionListener(e -> {
             if (!chatInput.getText().trim().isEmpty()) {
                 chatArea.append("Bạn: " + chatInput.getText() + "\n");
-                SocketClient.getInstance().send(chatInput.getText());
                 chatArea.append("Server: Đã nhận (Auto-reply)!\n");
                 chatInput.setText("");
                 chatArea.setCaretPosition(chatArea.getDocument().getLength()); // Tự động cuộn xuống cuối
@@ -290,7 +283,6 @@ public class HomeUser extends JFrame {
     }
 
 
-
     // ========== TIMER ==========
     private void startOnlineTimer() {
         long start = System.currentTimeMillis();
@@ -356,13 +348,6 @@ public class HomeUser extends JFrame {
 
             // Vẽ text lên trên nền gradient
             super.paintComponent(g);
-        }
-    }
-    public void connectserver(){
-        try {
-            SocketClient.getInstance().connect("127.0.0.1", 8080);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
