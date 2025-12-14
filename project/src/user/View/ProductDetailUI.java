@@ -1,4 +1,4 @@
-package user;
+package user.View;
 
 
 import java.awt.*;
