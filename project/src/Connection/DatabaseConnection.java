@@ -15,4 +15,12 @@ public class DatabaseConnection {
     public static Connection getConnection() throws Exception {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
+    public static void main(String[] args) {
+        try {
+            DatabaseConnection.getConnection();
+            System.out.println("Connected to the database successfully!");
+        } catch (Exception e) {
+            System.err.println("Failed to connect to the database: " + e.getMessage());
+        }
+    }
 }

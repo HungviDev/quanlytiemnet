@@ -4,6 +4,8 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
+import java.io.IOException;
+
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
@@ -21,6 +23,7 @@ public class HomeUser extends JFrame {
     private JTabbedPane tabs;
 
     public HomeUser() {
+        connect();
         setTitle("Home User");
         setSize(1200, 700); // Tăng chiều cao một chút cho thoáng
         setLocationRelativeTo(null);
@@ -181,6 +184,7 @@ public class HomeUser extends JFrame {
         btnSend.addActionListener(e -> {
             if (!chatInput.getText().trim().isEmpty()) {
                 chatArea.append("Bạn: " + chatInput.getText() + "\n");
+                SocketClient.getInstance().send(chatInput.getText());
                 chatArea.append("Server: Đã nhận (Auto-reply)!\n");
                 chatInput.setText("");
                 chatArea.setCaretPosition(chatArea.getDocument().getLength()); // Tự động cuộn xuống cuối
@@ -350,7 +354,14 @@ public class HomeUser extends JFrame {
             super.paintComponent(g);
         }
     }
-
+    public void connect(){
+        try {
+            SocketClient.getInstance().connect("127.0.0.1", 8080);
+        } catch (IOException e) {
+          
+            e.printStackTrace();
+        }
+    }
 
     public static void main(String[] args) {
         // Cố gắng thiết lập giao diện hệ thống để font chữ đẹp hơn trên Windows/Mac
