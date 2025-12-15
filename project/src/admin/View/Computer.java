@@ -3,11 +3,13 @@ package admin.View;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
-import admin.Controller.computerDAO;
+import Connection.DatabaseConnection;
+import admin.DAO.computerDAO;
 import admin.Model.computer;
 
 import java.util.ArrayList;
@@ -17,15 +19,21 @@ public class Computer extends JPanel  {
     private DashboardUI parentFrame;
     private final int ITEM_ICON_SIZE = 64; // Kích thước lớn cho icon máy tính
     private ArrayList<computer> listcomputer = new ArrayList<>();
-    private computerDAO computerDAO = new computerDAO();
+    private Connection connection ;
+    private computerDAO computerDAO;
     private servercontrol servercontrol = new servercontrol();
 
     public Computer(DashboardUI parentFrame) {
         this.parentFrame = parentFrame;
-        
+        try {
+            connection = DatabaseConnection.getConnection();
+            computerDAO = new computerDAO(connection);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         setLayout(new BorderLayout());
         setBackground(new Color(245, 247, 250)); // Màu nền của trang (ngoài cùng)
-
         // 1. HEADER (Chứa Title và Action Bar)
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(new Color(245, 247, 250));
@@ -48,7 +56,7 @@ public class Computer extends JPanel  {
         content.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         // Tạo cơ sở dữ liệu
-        listcomputer = computerDAO.getAllComputer();
+        loadData();
 
         for (computer computer : listcomputer) {
             content.add(createComputerItem(computer, "/img/computer.png", ITEM_ICON_SIZE));
@@ -143,12 +151,7 @@ public class Computer extends JPanel  {
                 } 
             }
         });
-        // 
-        JButton editButton = new JButton(" Sửa");
-        editButton.setBackground(new Color(108, 117, 125)); // Xám
-        editButton.setForeground(Color.WHITE);
-        editButton.setFocusPainted(false);
-        editButton.setFont(new Font("Segoe UI", Font.PLAIN, 13)); 
+     
 
         JButton deleteButton = new JButton(" Xóa");
         deleteButton.setBackground(new Color(220, 53, 69)); // Đỏ
@@ -157,7 +160,7 @@ public class Computer extends JPanel  {
         deleteButton.setFont(new Font("Segoe UI", Font.PLAIN, 13)); 
 
         actionPanel.add(lockButton);
-        actionPanel.add(editButton);
+    
         actionPanel.add(deleteButton);
         
         // Lắp ráp Panel Item
@@ -179,6 +182,10 @@ public class Computer extends JPanel  {
         } else {
             return Color.GRAY;
         }
+    }
+    private ArrayList<computer> loadData() {
+        computerDAO computerDAO = new computerDAO(connection);
+        return computerDAO.getAllComputer();
     }
 
 

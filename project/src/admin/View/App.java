@@ -5,7 +5,6 @@ public class App {
     public static void main(String[] args) {
         final DashboardUI dashboard = new DashboardUI();
         new Thread(() -> {
-   
             servercontrol.startServer(dashboard); 
         }).start();
         SwingUtilities.invokeLater(() -> {
