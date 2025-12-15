@@ -2,9 +2,7 @@ package admin.View;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.Connection;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
@@ -14,185 +12,215 @@ import admin.Model.computer;
 
 import java.util.ArrayList;
 
-public class Computer extends JPanel  {
-    
+public  class  Computer extends JPanel {
+
     private DashboardUI parentFrame;
-    private final int ITEM_ICON_SIZE = 64; // Kích thước lớn cho icon máy tính
+    private final int ITEM_ICON_SIZE = 64;
+
+    private JPanel content; // 🔥 PANEL CHỨA CÁC MÁY
     private ArrayList<computer> listcomputer = new ArrayList<>();
-    private Connection connection ;
+    
+    private Connection connection;
     private computerDAO computerDAO;
     private servercontrol servercontrol = new servercontrol();
-
     public Computer(DashboardUI parentFrame) {
         this.parentFrame = parentFrame;
         try {
             connection = DatabaseConnection.getConnection();
             computerDAO = new computerDAO(connection);
-
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         setLayout(new BorderLayout());
-        setBackground(new Color(245, 247, 250)); // Màu nền của trang (ngoài cùng)
-        // 1. HEADER (Chứa Title và Action Bar)
+        setBackground(new Color(245, 247, 250));
+
+        // ===== HEADER =====
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(new Color(245, 247, 250));
-        
+
         JLabel title = new JLabel("Quản lý máy tính");
         title.setFont(new Font("Segoe UI", Font.BOLD, 26));
-        title.setForeground(new Color(40, 40, 40));
         title.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
 
         headerPanel.add(title, BorderLayout.NORTH);
-        headerPanel.add(createActionBar(), BorderLayout.CENTER); 
-        
+        headerPanel.add(createActionBar(), BorderLayout.CENTER);
         add(headerPanel, BorderLayout.NORTH);
 
-        // 2. CONTENT GRID (Chứa các item máy tính)
-        JPanel content = new JPanel();
-        // Màu nền xám xanh nhạt, tạo độ tương phản nhẹ với card trắng
-        content.setBackground(new Color(240, 243, 245)); 
-        content.setLayout(new GridLayout(0, 4, 15, 15)); // 0 dòng (tự động), 4 cột, khoảng cách 15px
+        // ===== CONTENT =====
+        content = new JPanel(new GridLayout(0, 4, 15, 15));
+        content.setBackground(new Color(240, 243, 245));
         content.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        loadData();
-
-        for (computer computer : listcomputer) {
-            content.add(createComputerItem(computer, "/img/computer.png", ITEM_ICON_SIZE));
-        }
-        // Bọc Content trong JScrollPane để cho phép cuộn khi cần
         JScrollPane scrollPane = new JScrollPane(content);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder()); 
-        
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
         add(scrollPane, BorderLayout.CENTER);
+
+        // Load lần đầu
+        reloadComputerUI();
     }
-   
+
+    // ================= ACTION BAR =================
     private JPanel createActionBar() {
         JPanel actionBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         actionBar.setBackground(new Color(245, 247, 250));
         actionBar.setBorder(BorderFactory.createEmptyBorder(0, 20, 15, 20));
 
-        // Nút Thêm Máy tính
         JButton addButton = new JButton("➕ Thêm máy tính");
-        addButton.setBackground(new Color(40, 167, 69)); 
+        addButton.setBackground(new Color(40, 167, 69));
         addButton.setForeground(Color.WHITE);
-        addButton.setFocusPainted(false);
-        
-        // Nút Tắt Máy Hàng Loạt
+
         JButton shutdownButton = new JButton("🔌 Khóa máy hàng loạt");
-        shutdownButton.setBackground(new Color(220, 53, 69)); 
+        shutdownButton.setBackground(new Color(220, 53, 69));
         shutdownButton.setForeground(Color.WHITE);
-        shutdownButton.setFocusPainted(false);
+
         actionBar.add(addButton);
         actionBar.add(shutdownButton);
-        
+        addButton.addActionListener(e -> {
+            showAddComputerForm();
+        });
         return actionBar;
     }
 
-    private JPanel createComputerItem(computer computer, String iconPath, int preferredWidth) { 
-        JPanel itemPanel = new JPanel(new BorderLayout()); 
+    // ================= RELOAD UI =================
+    private void reloadComputerUI() {
+        content.removeAll();          
+        listcomputer = computerDAO.getAllComputer(); 
+
+        for (computer c : listcomputer) {
+            content.add(createComputerItem(c));
+        }
+        content.revalidate();          
+        content.repaint();             
+    }
+
+    // ================= COMPUTER ITEM =================
+    private JPanel createComputerItem(computer computer) {
+
+        JPanel itemPanel = new JPanel(new BorderLayout());
         itemPanel.setBackground(Color.WHITE);
-        itemPanel.setPreferredSize(new Dimension(preferredWidth, preferredWidth)); 
-
         itemPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(225, 225, 225), 1),
-            BorderFactory.createEmptyBorder(10, 10, 10, 10) 
+                BorderFactory.createLineBorder(new Color(225, 225, 225)),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
-        
-        // Icon
-        ImageIcon computerIcon = parentFrame.getScaledIcon(iconPath, ITEM_ICON_SIZE, ITEM_ICON_SIZE);
-        JLabel iconLabel = new JLabel(computerIcon);
-        iconLabel.setHorizontalAlignment(JLabel.CENTER);
-        
-        // --- PANEL CHỨA TÊN VÀ TÌNH TRẠNG (NORTH) ---
-        JPanel infoPanel = new JPanel();
-        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS)); // Sắp xếp dọc
-        infoPanel.setBackground(Color.WHITE);
-        infoPanel.setBorder(new EmptyBorder(0, 0, 5, 0)); 
-        
-        // Tên máy
-        JLabel nameLabel = new JLabel(computer.getName());
+
+        // ICON
+        ImageIcon icon = parentFrame.getScaledIcon(
+                "/img/computer.png",
+                ITEM_ICON_SIZE,
+                ITEM_ICON_SIZE
+        );
+        JLabel iconLabel = new JLabel(icon, JLabel.CENTER);
+
+        // INFO
+        JLabel nameLabel = new JLabel(computer.getName(), JLabel.CENTER);
         nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        nameLabel.setForeground(new Color(50, 50, 50));
-        nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT); 
 
-        // TÌNH TRẠNG MÁY
-        JLabel statusLabel = new JLabel(computer.getStatus());
-        statusLabel.setFont(new Font("Segoe UI", Font.ITALIC, 12));
+        JLabel statusLabel = new JLabel(computer.getStatus(), JLabel.CENTER);
         statusLabel.setForeground(getStatusColor(computer.getStatus()));
-        statusLabel.setAlignmentX(Component.CENTER_ALIGNMENT); 
 
+        JPanel infoPanel = new JPanel();
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        infoPanel.setBackground(Color.WHITE);
         infoPanel.add(nameLabel);
         infoPanel.add(statusLabel);
-        
-        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+
+        // ACTION
+        JPanel actionPanel = new JPanel(new FlowLayout());
         actionPanel.setBackground(Color.WHITE);
-        actionPanel.setBorder(new EmptyBorder(5, 0, 0, 0)); 
-        JButton lockButton;
-        if (computer.getStatus().equals("Đã khóa")) {
-            lockButton = new JButton(" Mở khóa");
-            lockButton.setBackground(new Color(255, 193, 7)); // Vàng
-        } else {
-            lockButton = new JButton(" Khóa máy");
-            lockButton.setBackground(new Color(23, 162, 184)); 
-        }
+
+        JButton lockButton = new JButton(
+                computer.getStatus().equals("Đã khóa") ? "Mở khóa" : "Khóa máy"
+        );
+
+        lockButton.setBackground(new Color(23, 162, 184));
         lockButton.setForeground(Color.WHITE);
-        lockButton.setFocusPainted(false);
-        lockButton.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        // xử lí gửi lệnh khóa
-        lockButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (computer.getStatus().equals("Đã khóa")) {
-                   servercontrol.sendCommandToClient(computer.getIpadress(), "unlock");
-                } else {
-                    servercontrol.sendCommandToClient(computer.getIpadress(), "lock");
-                } 
+
+        lockButton.addActionListener(e -> {
+            if (computer.getStatus().equals("Đã khóa")) {
+                servercontrol.sendCommandToClient(computer.getIpadress(), "unlock");
+            } else {
+                servercontrol.sendCommandToClient(computer.getIpadress(), "lock");
+            }
+            reloadComputerUI();
+        });
+
+        JButton deleteButton = new JButton("Xóa");
+        deleteButton.setBackground(new Color(220, 53, 69));
+        deleteButton.setForeground(Color.WHITE);
+
+        deleteButton.addActionListener((ActionEvent e) -> {
+            int confirm = JOptionPane.showConfirmDialog(
+                    null,
+                    "Bạn có chắc muốn xóa máy này?",
+                    "Xác nhận",
+                    JOptionPane.YES_NO_OPTION
+            );
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                if (computerDAO.deleteComputerByIp(computer.getIpadress())) {
+                    reloadComputerUI(); // 🔥 FIX LỖI
+                }
             }
         });
-     
-
-        JButton deleteButton = new JButton(" Xóa");
-        deleteButton.setBackground(new Color(220, 53, 69)); // Đỏ
-        deleteButton.setForeground(Color.WHITE);
-        deleteButton.setFocusPainted(false);
-        deleteButton.setFont(new Font("Segoe UI", Font.PLAIN, 13)); 
 
         actionPanel.add(lockButton);
-    
         actionPanel.add(deleteButton);
-        deleteButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                computerDAO.deleteComputerByIp(computer.getIpadress());
-                System.out.println("Xóa máy tính: " + computer.getIpadress());
-                loadData();
-            }
-        });
-        // Lắp ráp Panel Item
+
         itemPanel.add(infoPanel, BorderLayout.NORTH);
         itemPanel.add(iconLabel, BorderLayout.CENTER);
         itemPanel.add(actionPanel, BorderLayout.SOUTH);
-        
+
         return itemPanel;
     }
-    
 
+    // ================= STATUS COLOR =================
     private Color getStatusColor(String status) {
-        if (status.toLowerCase().contains("hoạt động")) {
-            return new Color(40, 167, 69); // Xanh lá
-        } else if (status.toLowerCase().contains("đã khóa")) {
-            return new Color(255, 193, 7); // Vàng
-        } else if (status.toLowerCase().contains("rảnh")) {
-            return new Color(23, 162, 184); // Xanh dương
+        status = status.toLowerCase();
+        if (status.contains("hoạt động")) return new Color(40, 167, 69);
+        if (status.contains("đã khóa")) return new Color(255, 193, 7);
+        if (status.contains("rảnh")) return new Color(23, 162, 184);
+        return Color.GRAY;
+    }
+    private void showAddComputerForm() {
+
+    JTextField txtName = new JTextField();
+    JTextField txtIp = new JTextField();
+
+    Object[] form = {
+            "Tên máy:", txtName,
+            "IP Address:", txtIp
+    };
+
+    int option = JOptionPane.showConfirmDialog(
+            this,
+            form,
+            "Thêm máy tính",
+            JOptionPane.OK_CANCEL_OPTION,
+            JOptionPane.PLAIN_MESSAGE
+    );
+
+    if (option == JOptionPane.OK_OPTION) {
+
+        String name = txtName.getText().trim();
+        String ip = txtIp.getText().trim();
+
+        if (name.isEmpty() || ip.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Không được để trống!");
+            return;
+        }
+
+        computer c = new computer();
+        c.setName(name);
+        c.setIpadress(ip);
+        c.setStatus("Rảnh"); // mặc định
+
+        if (computerDAO.insertComputer(c)) {
+            JOptionPane.showMessageDialog(this, "Thêm máy thành công!");
+            reloadComputerUI(); // 🔥 reload
         } else {
-            return Color.GRAY;
+            JOptionPane.showMessageDialog(this, "Thêm thất bại!");
         }
     }
-    private void loadData() {
-        computerDAO computerDAO = new computerDAO(connection);
-        listcomputer = computerDAO.getAllComputer();
-    }
-
-
+}
 }

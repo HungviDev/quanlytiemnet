@@ -306,8 +306,8 @@ class GradientPanel extends JPanel {
 
         btnMinus.setBackground(new Color(220, 220, 220));
         btnPlus.setBackground(new Color(220, 220, 220));
-    btnMinus.setFont(new Font("Arial", Font.BOLD, 18));
-    btnPlus.setFont(new Font("Arial", Font.BOLD, 18));
+        btnMinus.setFont(new Font("Arial", Font.BOLD, 18));
+        btnPlus.setFont(new Font("Arial", Font.BOLD, 18));
 
         btnMinus.setPreferredSize(new Dimension(35, 28));
         btnPlus.setPreferredSize(new Dimension(35, 28));
@@ -332,17 +332,17 @@ class GradientPanel extends JPanel {
         quantityPanel.add(btnPlus);
 
         // =============== ADD BUTTON ===============
-RoundedButton btnBuyNow = new RoundedButton("MUA NGAY", 18);
-btnBuyNow.setBackground(new Color(46, 204, 113));
-btnBuyNow.setName("buy_now");
-btnBuyNow.setForeground(Color.WHITE);
-btnBuyNow.setPreferredSize(new Dimension(120, 40));
-btnBuyNow.setFocusPainted(false);
-btnBuyNow.setFont(new Font("Segoe UI", Font.BOLD, 14));
-btnBuyNow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        RoundedButton btnBuyNow = new RoundedButton("MUA NGAY", 18);
+        btnBuyNow.setBackground(new Color(46, 204, 113));
+        btnBuyNow.setName("buy_now");
+        btnBuyNow.setForeground(Color.WHITE);
+        btnBuyNow.setPreferredSize(new Dimension(120, 40));
+        btnBuyNow.setFocusPainted(false);
+        btnBuyNow.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnBuyNow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
 
 
-btnBuyNow.addActionListener(e -> openProductDetail(p));
+        btnBuyNow.addActionListener(e -> openProductDetail(p));
         // =============== CARD BUILD ===============
         card.add(lblPriceTop);
         card.add(Box.createVerticalStrut(5));
@@ -350,17 +350,14 @@ btnBuyNow.addActionListener(e -> openProductDetail(p));
         card.add(Box.createVerticalStrut(5));
         card.add(lblName);
         card.add(Box.createVerticalStrut(10));
-// PANEL CHỨA QUANTITY + BUY BUTTON
 JPanel bottomPanel = new JPanel();
 bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.X_AXIS));
 bottomPanel.setBackground(cardColor);
 
-// Fix height cho MUA NGAY để không bị kéo to
 btnBuyNow.setPreferredSize(new Dimension(120, 40));
 btnBuyNow.setMaximumSize(new Dimension(120, 40));
 btnBuyNow.setMinimumSize(new Dimension(120, 40));
 
-// Fix chiều cao cho quantity panel
 quantityPanel.setMaximumSize(new Dimension(120, 40));
 quantityPanel.setMinimumSize(new Dimension(120, 40));
 

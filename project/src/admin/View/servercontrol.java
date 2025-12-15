@@ -11,6 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.JFrame; // Cần thiết
 import javax.swing.SwingUtilities; // Cần thiết
 
+import Connection.DatabaseConnection;
+import admin.DAO.computerDAO;
+
 public class servercontrol {
     
     private static final int PORT = 8080;
@@ -24,7 +27,6 @@ public class servercontrol {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Client mới kết nối từ: " + clientSocket.getInetAddress().getHostName());
                 
-                // ⭐️ TRUYỀN OWNER FRAME VÀO HANDLER
                 new ClientHandler(clientSocket, ownerFrame).start();
             }
         } catch (IOException e) {
@@ -65,12 +67,14 @@ public class servercontrol {
                     
                     if (inputLine.startsWith("ID:")) {
                         clientId = clientSocket.getInetAddress().getHostAddress();
+                        computerDAO dao = new computerDAO(DatabaseConnection.getConnection());
+                        if(dao.updatestatusbyip(clientId, "Hoạt động")){
+                            System.out.println("-> Client " + clientId + " chuyển sang hoạt động");
+                        }
                         servercontrol.clientOutputs.put(clientId, out); 
                         System.out.println("-> Client " + clientId + " đã đăng ký và kết nối thành công.");
                         continue; 
                     }
-                    
-                    // ⭐️ LOGIC ĐÃ SỬA: Hiển thị JDialog
                     System.out.println("Nhận dữ liệu từ " + clientSocket.getInetAddress().getHostAddress() + ": " + inputLine);
                     
                     final String sourceId = clientId;
@@ -87,16 +91,29 @@ public class servercontrol {
                 }
             } catch (IOException e) {
                 System.err.println("Mất kết nối với Client " + clientId + ".");
+            } catch (Exception e) {
+                e.printStackTrace();
             } finally {
-                servercontrol.clientOutputs.remove(clientId);
-                try { 
-                    if (clientSocket != null && !clientSocket.isClosed()) {
-                        clientSocket.close();
-                    }
-                } catch (IOException e) {
-                }
-                System.out.println("Đã đóng và XÓA kết nối với Client: " + clientId);
-            }
+    if (clientId != null && !clientId.equals("UNKNOWN")) {
+        try {
+            computerDAO dao = new computerDAO(DatabaseConnection.getConnection());
+            dao.updatestatusbyip(clientId, "Rảnh");
+            System.out.println("-> Client " + clientId + " chuyển sang RẢNH");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    servercontrol.clientOutputs.remove(clientId);
+    try {
+        if (clientSocket != null && !clientSocket.isClosed()) {
+            clientSocket.close();
+        }
+    } catch (IOException e) {
+    }
+
+    System.out.println("Đã đóng và XÓA kết nối với Client: " + clientId);
+}
+
         }
     }
 }

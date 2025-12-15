@@ -3,6 +3,8 @@ package user.View;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.InetAddress;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -86,8 +88,12 @@ public class Login extends JFrame {
         btnLogin.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new HomeUser().setVisible(true); // mở frame mới
-                dispose(); // đóng frame login
+                try {
+                    new HomeUser().setVisible(true);
+                    dispose();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
             }
         });
 

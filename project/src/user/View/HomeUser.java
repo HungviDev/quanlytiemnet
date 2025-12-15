@@ -5,10 +5,15 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.sql.Connection;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
+
+import Connection.DatabaseConnection;
+import admin.DAO.computerDAO;
 
 public class HomeUser extends JFrame {
 
@@ -21,9 +26,19 @@ public class HomeUser extends JFrame {
 
     private JLabel lblOnlineTime, lblRemainingTime;
     private JTabbedPane tabs;
-
+    private String ipAddress;
+    private Connection connection;
+    private computerDAO computerDAO;
     public HomeUser() {
         connect();
+        try {
+            ipAddress = InetAddress.getLocalHost().getHostAddress();
+            connection = DatabaseConnection.getConnection();
+            SocketClient.getInstance().send("Có máy kết nối: " + ipAddress);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         setTitle("Home User");
         setSize(1200, 700); // Tăng chiều cao một chút cho thoáng
         setLocationRelativeTo(null);
@@ -139,7 +154,7 @@ public class HomeUser extends JFrame {
         btnGo.setPreferredSize(new Dimension(400, 45)); // Nút to hơn một chút
         btnGo.setFont(new Font("Segoe UI", Font.BOLD, 18));
 
-        btnGo.addActionListener(e -> tabs.setSelectedIndex(1));
+        btnGo.addActionListener(e -> new ProductListUI().setVisible(true));
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(BG_COLOR);
@@ -357,7 +372,6 @@ public class HomeUser extends JFrame {
         try {
             SocketClient.getInstance().connect("127.0.0.1", 8080);
         } catch (IOException e) {
-          
             e.printStackTrace();
         }
     }
