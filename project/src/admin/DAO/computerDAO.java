@@ -51,11 +51,11 @@ public class computerDAO {
 }
     public boolean insertComputer(computer computer) {
    
-        String sql = "INSERT INTO computers (ip_address, computer_name, status) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO computers (name,ip_address,status) VALUES (?, ?, ?)";
         
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, computer.getIpadress());
-            statement.setString(2, computer.getName()); 
+            statement.setString(1, computer.getName());
+            statement.setString(2, computer.getIpadress()); 
             statement.setString(3, computer.getStatus()); 
             int rowsInserted = statement.executeUpdate();
             return rowsInserted > 0;
@@ -66,6 +66,16 @@ public class computerDAO {
             return false;
         }
     }
-    
-    
+    public boolean updatestatusbyip(String ip, String status) {
+        String sql = "UPDATE computers SET status = ? WHERE ip_address = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, status);
+            statement.setString(2, ip);
+            int rowsUpdated = statement.executeUpdate();
+            return rowsUpdated > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

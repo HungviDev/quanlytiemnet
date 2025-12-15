@@ -12,11 +12,8 @@ public class computer {
         this.status = status;
     }
     
-    public computer(String id) {
-        this.id = id;
+    public computer() {
     }
-
-
 
     public String getId() {
         return id;

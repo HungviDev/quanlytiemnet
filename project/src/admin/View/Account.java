@@ -197,7 +197,6 @@ public class Account extends JPanel {
     private void deleteAcc(){
         int r = table.getSelectedRow();
         if(r < 0){ msg("Vui lòng chọn tài khoản!"); return; }
-
         if(JOptionPane.showConfirmDialog(this,"Xóa tài khoản?","Xác nhận",
                 JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION){
             AccountModel selected = cachedList.get(r);

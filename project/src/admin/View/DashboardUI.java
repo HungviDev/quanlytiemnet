@@ -42,9 +42,9 @@ public class DashboardUI extends JFrame {
 
         mainPanel.add(new Computer(this), "computers");
         mainPanel.add(new Account(), "accounts");
-        mainPanel.add(new Storage(), "storages");
+        mainPanel.add(new StorageView(), "storages");
         mainPanel.add(new Order(), "orders");
-        mainPanel.add(new Static(), "statics");
+        mainPanel.add(new RevenueDashboard(), "statics");
         add(mainPanel, BorderLayout.CENTER);
         setVisible(true);
     }
