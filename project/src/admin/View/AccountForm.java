@@ -7,23 +7,23 @@ public class AccountForm extends JDialog {
     private JTextField tfUsername;
     private JPasswordField pfPassword;
     private JTextField tfAmount;
-    private JTextField tfCreatedAt;
+    private JTextField tfCreated_at;
 
     private boolean saved = false;
-    private static final int RATE = 10000; // 10000 VND = 1 hour
+    private static final int RATE = 10000;
 
     public AccountForm(Window owner, String title, boolean modal,
-                       String username, String password, String createdAt) {
+                       String username, String password, String created_at) {
         super(owner, title, ModalityType.APPLICATION_MODAL);
-        initComponents(username, password, createdAt);
+        initComponents(username, password, created_at);
     }
 
-    private void initComponents(String username, String password, String createdAt) {
+    private void initComponents(String username, String password, String created_at) {
         tfUsername = new JTextField(username, 20);
         pfPassword = new JPasswordField(password, 20);
         tfAmount = new JTextField("", 20);
-        tfCreatedAt = new JTextField(createdAt, 20);
-        tfCreatedAt.setEditable(false);
+        tfCreated_at = new JTextField(created_at, 20);
+        tfCreated_at.setEditable(false);
 
         JButton btnSave = new JButton("Lưu");
         JButton btnCancel = new JButton("Hủy");
@@ -59,9 +59,10 @@ public class AccountForm extends JDialog {
 
         gc.gridx = 0; gc.gridy++; form.add(new JLabel("Số tiền nạp (VND):"), gc);
         gc.gridx = 1; form.add(tfAmount, gc);
+        tfAmount.setText("0");
 
         gc.gridx = 0; gc.gridy++; form.add(new JLabel("Thời gian tạo:"), gc);
-        gc.gridx = 1; form.add(tfCreatedAt, gc);
+        gc.gridx = 1; form.add(tfCreated_at, gc);
 
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttons.add(btnCancel);
@@ -87,5 +88,11 @@ public class AccountForm extends JDialog {
         long amount = Long.parseLong(tfAmount.getText().trim());
         return amount / RATE;
     }
-    public String getCreatedAt() { return tfCreatedAt.getText().trim(); }
+    public long getAmount() {
+        try {
+            
+            return Long.parseLong(tfAmount.getText().trim());
+        } catch(Exception e) { return 0; }
+    }
+    public String getCreated_at() { return tfCreated_at.getText().trim(); }
 }

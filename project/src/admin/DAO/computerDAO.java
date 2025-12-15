@@ -5,8 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-
-import Connection.DatabaseConnection;
 import admin.Model.computer;
 
 public class computerDAO {

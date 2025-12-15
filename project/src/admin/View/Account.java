@@ -1,10 +1,15 @@
 package admin.View;
 
+import Connection.DatabaseConnection;
+import admin.DAO.AccountDAO;
+import admin.Model.AccountModel;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.imageio.ImageIO;
@@ -20,9 +25,21 @@ public class Account extends JPanel {
 
     private JTable table;
     private DefaultTableModel model;
+    private java.util.List<AccountModel> cachedList = new ArrayList<>();
     private Timer timer;
+    private static final int RATE = 10000; // 10000 VND = 1 hour
+    private AccountDAO accountDAO;
+    private Connection connection ;
+
 
     public Account() {
+          try {
+            connection = DatabaseConnection.getConnection();
+            accountDAO = new AccountDAO(connection);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         setLayout(new BorderLayout(10, 10));
         setBackground(BG);
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
@@ -52,10 +69,17 @@ public class Account extends JPanel {
         p.setBackground(Color.WHITE);
 
         String[] cols = {"STT", "Tài khoản", "Mật khẩu", "Thời gian còn lại", "Thời gian tạo"};
-        model = new DefaultTableModel(cols, 0){ @Override public boolean isCellEditable(int r,int c){ return false; }};
-
+        model = new DefaultTableModel(cols, 0) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
+    loadAccountTable(); // LOAD DATA
+        
         table = new JTable(model);
         table.setFont(FN);
+        table.setModel(model);
         table.setRowHeight(30);
         styleHeader();
 
@@ -78,8 +102,6 @@ public class Account extends JPanel {
         p.add(btn("THÊM", new Color(52,152,219), "/img/add.png", e -> addAcc()));
         p.add(btn("SỬA", new Color(46,204,113), "/img/edit.png", e -> editAcc()));
         p.add(btn("XÓA", new Color(231,76,60), "/img/delete.png", e -> deleteAcc()));
-        p.add(btn("LÀM MỚI", new Color(155,89,182), "/img/refresh.png", e -> refreshAcc()));
-
         return p;
     }
 
@@ -117,16 +139,17 @@ public class Account extends JPanel {
         String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
         AccountForm form = new AccountForm(SwingUtilities.getWindowAncestor(this), "Thêm tài khoản", true,
                 "", "", now);
-
         if(form.showDialog()){
-            long sec = form.getHours() * 3600;
-            model.addRow(new Object[]{
-                    model.getRowCount() + 1,
-                    form.getUsername(),
-                    form.getPassword(),
-                    format(sec),
-                    form.getCreatedAt()
-            });
+            long amount = form.getAmount(); // VND
+            try (Connection conn = DatabaseConnection.getConnection()){
+                AccountDAO dao = new AccountDAO(conn);
+                AccountModel a = new AccountModel(form.getUsername(), form.getPassword(), amount, form.getCreated_at());
+                if(dao.insertAccount(a)){
+                    refreshAcc();
+                } else {
+                    msg("Lỗi khi lưu vào database.");
+                }
+            } catch(Exception e){ e.printStackTrace(); msg("Kết nối DB thất bại."); }
         }
     }
 
@@ -137,22 +160,37 @@ public class Account extends JPanel {
             return;
         }
 
+        AccountModel selected = cachedList.get(r);
+        int userId = selected.getUserId();
+        String oldUsername = selected.getUsername();
         AccountForm form = new AccountForm(
-                SwingUtilities.getWindowAncestor(this),
-                "Chỉnh sửa tài khoản",
-                true,
-                model.getValueAt(r,1).toString(),
-                model.getValueAt(r,2).toString(),
-                model.getValueAt(r,4).toString()
+            SwingUtilities.getWindowAncestor(this),
+            "Chỉnh sửa tài khoản",
+            true,
+            oldUsername,
+            model.getValueAt(r,2).toString(),
+            model.getValueAt(r,4).toString()
         );
 
         if(form.showDialog()){
-            model.setValueAt(form.getUsername(), r, 1);
-            model.setValueAt(form.getPassword(), r, 2);
-
-            long old = toSec(model.getValueAt(r,3).toString());
-            long added = form.getHours() * 3600;
-            model.setValueAt(format(old + added), r, 3);
+            String newUsername = form.getUsername();
+            String password = form.getPassword();
+            long addedAmount = form.getAmount();
+            try (Connection conn = DatabaseConnection.getConnection()){
+                    AccountDAO dao = new AccountDAO(conn);
+                    boolean okRename = true;
+                    if(!oldUsername.equals(newUsername)){
+                        okRename = dao.updateUsername(userId, newUsername);
+                    }
+                    boolean ok1 = dao.updatePassword(userId, password);
+                    boolean ok2 = dao.addBalance(userId, addedAmount);
+                    if(okRename && (ok1 || ok2)){
+                        // refresh row data from DB
+                        refreshAcc();
+                    } else {
+                        msg("Cập nhật thất bại.");
+                    }
+            } catch(Exception e){ e.printStackTrace(); msg("Kết nối DB thất bại."); }
         }
     }
 
@@ -162,18 +200,40 @@ public class Account extends JPanel {
 
         if(JOptionPane.showConfirmDialog(this,"Xóa tài khoản?","Xác nhận",
                 JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION){
-            model.removeRow(r);
+            AccountModel selected = cachedList.get(r);
+            int userId = selected.getUserId();
+            try (Connection conn = DatabaseConnection.getConnection()){
+                AccountDAO dao = new AccountDAO(conn);
+                if(dao.deleteById(userId)){
+                    refreshAcc();
+                } else {
+                    msg("Xóa thất bại trên DB.");
+                }
+            } catch(Exception e){ e.printStackTrace(); msg("Kết nối DB thất bại."); }
         }
     }
 
     private void refreshAcc() {
         model.setRowCount(0);
-        // TODO: load DB
+        try (Connection conn = DatabaseConnection.getConnection()){
+            AccountDAO dao = new AccountDAO(conn);
+            java.util.ArrayList<AccountModel> list = dao.getAllAccounts();
+            cachedList = list;
+            for(int i = 0; i < list.size(); i++){
+                AccountModel a = list.get(i);
+                long sec = (a.getBalance() / RATE) * 3600;
+                model.addRow(new Object[]{
+                    i + 1,
+                    a.getUsername(),
+                    a.getPassword(),
+                    format(sec),
+                    a.getCreatedAt()
+                });
+            }
+        } catch(Exception e){ e.printStackTrace(); msg("Không thể tải dữ liệu từ DB."); }
     }
 
     private void msg(String m){ JOptionPane.showMessageDialog(this, m); }
-
-    // ================= TIMER =================
     private void startTimer() {
         timer = new Timer(true);
         timer.scheduleAtFixedRate(new TimerTask(){
@@ -181,18 +241,24 @@ public class Account extends JPanel {
         },1000,1000);
     }
 
-    private void countdown(){
+    private void countdown() {
     SwingUtilities.invokeLater(() -> {
-        for(int i = 0; i < model.getRowCount(); i++){
-            long sec = toSec(model.getValueAt(i,3).toString());
-            if(sec > 0){
+        for (int i = 0; i < model.getRowCount(); i++) {
+            int userId = Integer.parseInt(model.getValueAt(i, 0).toString());
+            if (!accountDAO.checkStatusByUserId(userId)) {
+                continue; //
+            }
+            long sec = toSec(model.getValueAt(i, 3).toString());
+
+            if (sec > 0) {
                 model.setValueAt(format(sec - 1), i, 3);
-            }else{
-                model.setValueAt("Hết giờ", i, 3); // ✅ KHÔNG XÓA
+            } else {
+                model.setValueAt("Hết giờ", i, 3);
             }
         }
     });
 }
+
 
 
     // ================= UTIL =================
@@ -215,4 +281,7 @@ public class Account extends JPanel {
     public void stopTimer(){
         if(timer != null) timer.cancel();
     }
+    public void loadAccountTable() {
+        refreshAcc();
+}
 }
