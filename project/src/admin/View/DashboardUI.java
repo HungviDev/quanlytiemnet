@@ -31,6 +31,7 @@ public class DashboardUI extends JFrame {
         sidebar.add(createMenu("  Quản lý máy tính ", "computers", "/img/computer.png"));
         sidebar.add(createMenu("  Quản lý tài khoản", "accounts", "/img/account.png"));
         sidebar.add(createMenu("  Quản lý đơn hàng", "orders", "/img/order.png"));
+        sidebar.add(createMenu("  Quản lí kho", "storages", "/img/storage.png"));
         sidebar.add(createMenu("  Thống kê", "statics", "/img/statics.png"));
         sidebar.add(createMenu("  Đăng xuất", "logout", "/img/logout.png"));
 
@@ -41,6 +42,7 @@ public class DashboardUI extends JFrame {
 
         mainPanel.add(new Computer(this), "computers");
         mainPanel.add(new Account(), "accounts");
+        mainPanel.add(new Storage(), "storages");
         mainPanel.add(new Order(), "orders");
         mainPanel.add(new Static(), "statics");
         add(mainPanel, BorderLayout.CENTER);

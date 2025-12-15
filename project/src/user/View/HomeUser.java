@@ -49,7 +49,7 @@ public class HomeUser extends JFrame {
         tabs.addTab("Trang chủ", createHomeTab());
         
         // Tab 1: Dịch vụ (Chỉ cần add một JPanel rỗng vì ta sẽ chuyển trang ngay khi click)
-        tabs.addTab("Dịch vụ", new JPanel()); 
+
 
         // THÊM ĐOẠN NÀY: Bắt sự kiện chuyển tab
         tabs.addChangeListener(e -> {
@@ -145,7 +145,6 @@ public class HomeUser extends JFrame {
         buttonPanel.setBackground(BG_COLOR);
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
         buttonPanel.add(btnGo);
-
         // ========== BOTTOM CHAT ==========
         JPanel chatPanel = new JPanel(new BorderLayout());
         chatPanel.setBackground(BG_COLOR);
@@ -364,14 +363,11 @@ public class HomeUser extends JFrame {
     }
 
     public static void main(String[] args) {
-        // Cố gắng thiết lập giao diện hệ thống để font chữ đẹp hơn trên Windows/Mac
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        // Chạy trên luồng sự kiện Swing (best practice)
         SwingUtilities.invokeLater(() -> {
             new HomeUser().setVisible(true);
         });
