@@ -55,7 +55,6 @@ public class Computer extends JPanel  {
         content.setLayout(new GridLayout(0, 4, 15, 15)); // 0 dòng (tự động), 4 cột, khoảng cách 15px
         content.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Tạo cơ sở dữ liệu
         loadData();
 
         for (computer computer : listcomputer) {
@@ -162,7 +161,14 @@ public class Computer extends JPanel  {
         actionPanel.add(lockButton);
     
         actionPanel.add(deleteButton);
-        
+        deleteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                computerDAO.deleteComputerByIp(computer.getIpadress());
+                System.out.println("Xóa máy tính: " + computer.getIpadress());
+                loadData();
+            }
+        });
         // Lắp ráp Panel Item
         itemPanel.add(infoPanel, BorderLayout.NORTH);
         itemPanel.add(iconLabel, BorderLayout.CENTER);
@@ -183,9 +189,9 @@ public class Computer extends JPanel  {
             return Color.GRAY;
         }
     }
-    private ArrayList<computer> loadData() {
+    private void loadData() {
         computerDAO computerDAO = new computerDAO(connection);
-        return computerDAO.getAllComputer();
+        listcomputer = computerDAO.getAllComputer();
     }
 
 
