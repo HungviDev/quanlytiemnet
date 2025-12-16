@@ -26,8 +26,7 @@ public class Login extends JFrame {
 
                 GradientPaint gp = new GradientPaint(
                         0, 0, new Color(49, 88, 200),
-                        getWidth(), getHeight(), new Color(194, 53, 191)
-                );
+                        getWidth(), getHeight(), new Color(194, 53, 191));
                 g2d.setPaint(gp);
                 g2d.fillRect(0, 0, getWidth(), getHeight());
             }
@@ -67,11 +66,11 @@ public class Login extends JFrame {
 
         // Lấy icon từ thư mục img
         ImageIcon userIcon = new ImageIcon(getClass().getResource("/img/user.png"));
-        ImageIcon passIcon  = new ImageIcon(getClass().getResource("/img/padlock.png"));
+        ImageIcon passIcon = new ImageIcon(getClass().getResource("/img/padlock.png"));
 
         // Truyền icon vào input field
         JPanel userBox = createInputField("  Tài khoản", userIcon);
-        JPanel passBox  = createInputField(" Mật khẩu", passIcon);
+        JPanel passBox = createInputField(" Mật khẩu", passIcon);
 
         // Nút login
         JButton btnLogin = new JButton("Đăng nhập");
@@ -83,17 +82,17 @@ public class Login extends JFrame {
         btnLogin.setFont(new Font("Segoe UI", Font.BOLD, 16));
         btnLogin.setFocusPainted(false);
         btnLogin.setBorder(new LineBorder(new Color(35, 150, 50), 1, true));
-        
-        //Vào trang HomeUser
+
+        // Vào trang HomeUser
         btnLogin.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
                     new HomeUser().setVisible(true);
                     dispose();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         });
 
@@ -135,45 +134,44 @@ public class Login extends JFrame {
     }
 
     private JPanel createInputField(String placeholder, ImageIcon icon) {
-    JPanel panel = new JPanel();
-    panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-    panel.setBackground(new Color(245, 245, 245));
-    panel.setBorder(new LineBorder(new Color(225, 225, 225), 1, true));
-    panel.setMaximumSize(new Dimension(300, 40));
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+        panel.setBackground(new Color(245, 245, 245));
+        panel.setBorder(new LineBorder(new Color(225, 225, 225), 1, true));
+        panel.setMaximumSize(new Dimension(300, 40));
 
-    // Resize icon 20x20
-    Image scaled = icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
-    JLabel iconLabel = new JLabel(new ImageIcon(scaled));
-    iconLabel.setBorder(new EmptyBorder(0, 10, 0, 10));
+        // Resize icon 20x20
+        Image scaled = icon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+        JLabel iconLabel = new JLabel(new ImageIcon(scaled));
+        iconLabel.setBorder(new EmptyBorder(0, 10, 0, 10));
 
-    JTextField field = new JTextField(placeholder);
-    field.setForeground(Color.GRAY);
-    field.setBorder(null);
-    field.setBackground(new Color(245, 245, 245));
+        JTextField field = new JTextField(placeholder);
+        field.setForeground(Color.GRAY);
+        field.setBorder(null);
+        field.setBackground(new Color(245, 245, 245));
 
-    field.addFocusListener(new java.awt.event.FocusAdapter() {
-        public void focusGained(java.awt.event.FocusEvent evt) {
-            if (field.getText().equals(placeholder)) {
-                field.setText("");
-                field.setForeground(Color.BLACK);
+        field.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                if (field.getText().equals(placeholder)) {
+                    field.setText("");
+                    field.setForeground(Color.BLACK);
+                }
             }
-        }
 
-        public void focusLost(java.awt.event.FocusEvent evt) {
-            if (field.getText().isEmpty()) {
-                field.setText(placeholder);
-                field.setForeground(Color.GRAY);
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                if (field.getText().isEmpty()) {
+                    field.setText(placeholder);
+                    field.setForeground(Color.GRAY);
+                }
             }
-        }
-    });
+        });
 
-    panel.add(iconLabel);
-    panel.add(field);
+        panel.add(iconLabel);
+        panel.add(field);
 
-    return panel;
-    
-}
+        return panel;
 
+    }
 
     public static void main(String[] args) {
         new Login();

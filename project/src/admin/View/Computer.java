@@ -12,18 +12,20 @@ import admin.Model.computer;
 
 import java.util.ArrayList;
 
-public  class  Computer extends JPanel {
-
+public class Computer extends JPanel {
+    public static Computer instance;
     private DashboardUI parentFrame;
     private final int ITEM_ICON_SIZE = 64;
 
     private JPanel content; // 🔥 PANEL CHỨA CÁC MÁY
     private ArrayList<computer> listcomputer = new ArrayList<>();
-    
+
     private Connection connection;
     private computerDAO computerDAO;
     private servercontrol servercontrol = new servercontrol();
+
     public Computer(DashboardUI parentFrame) {
+        instance = this;
         this.parentFrame = parentFrame;
         try {
             connection = DatabaseConnection.getConnection();
@@ -83,15 +85,15 @@ public  class  Computer extends JPanel {
     }
 
     // ================= RELOAD UI =================
-    private void reloadComputerUI() {
-        content.removeAll();          
-        listcomputer = computerDAO.getAllComputer(); 
+    public void reloadComputerUI() {
+        content.removeAll();
+        listcomputer = computerDAO.getAllComputer();
 
         for (computer c : listcomputer) {
             content.add(createComputerItem(c));
         }
-        content.revalidate();          
-        content.repaint();             
+        content.revalidate();
+        content.repaint();
     }
 
     // ================= COMPUTER ITEM =================
@@ -101,15 +103,13 @@ public  class  Computer extends JPanel {
         itemPanel.setBackground(Color.WHITE);
         itemPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(225, 225, 225)),
-                BorderFactory.createEmptyBorder(10, 10, 10, 10)
-        ));
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 
         // ICON
         ImageIcon icon = parentFrame.getScaledIcon(
                 "/img/computer.png",
                 ITEM_ICON_SIZE,
-                ITEM_ICON_SIZE
-        );
+                ITEM_ICON_SIZE);
         JLabel iconLabel = new JLabel(icon, JLabel.CENTER);
 
         // INFO
@@ -130,8 +130,7 @@ public  class  Computer extends JPanel {
         actionPanel.setBackground(Color.WHITE);
 
         JButton lockButton = new JButton(
-                computer.getStatus().equals("Đã khóa") ? "Mở khóa" : "Khóa máy"
-        );
+                computer.getStatus().equals("Đã khóa") ? "Mở khóa" : "Khóa máy");
 
         lockButton.setBackground(new Color(23, 162, 184));
         lockButton.setForeground(Color.WHITE);
@@ -154,8 +153,7 @@ public  class  Computer extends JPanel {
                     null,
                     "Bạn có chắc muốn xóa máy này?",
                     "Xác nhận",
-                    JOptionPane.YES_NO_OPTION
-            );
+                    JOptionPane.YES_NO_OPTION);
 
             if (confirm == JOptionPane.YES_OPTION) {
                 if (computerDAO.deleteComputerByIp(computer.getIpadress())) {
@@ -177,50 +175,53 @@ public  class  Computer extends JPanel {
     // ================= STATUS COLOR =================
     private Color getStatusColor(String status) {
         status = status.toLowerCase();
-        if (status.contains("hoạt động")) return new Color(40, 167, 69);
-        if (status.contains("đã khóa")) return new Color(255, 193, 7);
-        if (status.contains("rảnh")) return new Color(23, 162, 184);
+        if (status.contains("hoạt động"))
+            return new Color(40, 167, 69);
+        if (status.contains("đã khóa"))
+            return new Color(255, 193, 7);
+        if (status.contains("rảnh"))
+            return new Color(23, 162, 184);
         return Color.GRAY;
     }
+
     private void showAddComputerForm() {
 
-    JTextField txtName = new JTextField();
-    JTextField txtIp = new JTextField();
+        JTextField txtName = new JTextField();
+        JTextField txtIp = new JTextField();
 
-    Object[] form = {
-            "Tên máy:", txtName,
-            "IP Address:", txtIp
-    };
+        Object[] form = {
+                "Tên máy:", txtName,
+                "IP Address:", txtIp
+        };
 
-    int option = JOptionPane.showConfirmDialog(
-            this,
-            form,
-            "Thêm máy tính",
-            JOptionPane.OK_CANCEL_OPTION,
-            JOptionPane.PLAIN_MESSAGE
-    );
+        int option = JOptionPane.showConfirmDialog(
+                this,
+                form,
+                "Thêm máy tính",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE);
 
-    if (option == JOptionPane.OK_OPTION) {
+        if (option == JOptionPane.OK_OPTION) {
 
-        String name = txtName.getText().trim();
-        String ip = txtIp.getText().trim();
+            String name = txtName.getText().trim();
+            String ip = txtIp.getText().trim();
 
-        if (name.isEmpty() || ip.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Không được để trống!");
-            return;
-        }
+            if (name.isEmpty() || ip.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Không được để trống!");
+                return;
+            }
 
-        computer c = new computer();
-        c.setName(name);
-        c.setIpadress(ip);
-        c.setStatus("Rảnh"); // mặc định
+            computer c = new computer();
+            c.setName(name);
+            c.setIpadress(ip);
+            c.setStatus("Rảnh"); // mặc định
 
-        if (computerDAO.insertComputer(c)) {
-            JOptionPane.showMessageDialog(this, "Thêm máy thành công!");
-            reloadComputerUI(); // 🔥 reload
-        } else {
-            JOptionPane.showMessageDialog(this, "Thêm thất bại!");
+            if (computerDAO.insertComputer(c)) {
+                JOptionPane.showMessageDialog(this, "Thêm máy thành công!");
+                reloadComputerUI(); // 🔥 reload
+            } else {
+                JOptionPane.showMessageDialog(this, "Thêm thất bại!");
+            }
         }
     }
-}
 }

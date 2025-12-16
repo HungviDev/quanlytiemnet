@@ -1,4 +1,5 @@
 package admin.View;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
@@ -14,26 +15,27 @@ import javax.swing.border.EmptyBorder;
 
 public class NotificationForm extends JDialog {
 
-    private final Color HEADER_COLOR = new Color(52, 152, 219); 
-    private final Color TEXT_COLOR = new Color(44, 62, 80); 
-    private final Color BG_COLOR = new Color(240, 243, 245); 
+    private final Color HEADER_COLOR = new Color(52, 152, 219);
+    private final Color TEXT_COLOR = new Color(44, 62, 80);
+    private final Color BG_COLOR = new Color(240, 243, 245);
 
     /**
      * Constructor tạo dialog thông báo tùy chỉnh
-     * @param owner Khung cha (JFrame)
+     * 
+     * @param owner        Khung cha (JFrame)
      * @param computerName Tên máy tính gửi thông báo
-     * @param message Nội dung thông báo
+     * @param message      Nội dung thông báo
      */
     public NotificationForm(JFrame owner, String computerName, String message) {
-        super(owner, "Thông báo mới", true); 
-        
+        super(owner, "Thông báo mới", true);
+
         // Cấu hình chung cho Dialog
         setLayout(new BorderLayout(10, 10));
         setBackground(BG_COLOR);
-        setSize(600, 350); 
-        setLocationRelativeTo(owner); 
+        setSize(600, 350);
+        setLocationRelativeTo(owner);
         setResizable(false);
-        
+
         // 1. PHẦN HEADER (Tiêu đề và nguồn)
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(HEADER_COLOR);
@@ -49,7 +51,7 @@ public class NotificationForm extends JDialog {
 
         headerPanel.add(titleLabel, BorderLayout.NORTH);
         headerPanel.add(sourceLabel, BorderLayout.SOUTH);
-        
+
         add(headerPanel, BorderLayout.NORTH);
 
         // 2. PHẦN NỘI DUNG
@@ -64,7 +66,7 @@ public class NotificationForm extends JDialog {
         messageArea.setLineWrap(true);
         messageArea.setEditable(false);
         messageArea.setBackground(BG_COLOR);
-        
+
         contentPanel.add(messageArea, BorderLayout.CENTER);
 
         add(contentPanel, BorderLayout.CENTER);
@@ -79,9 +81,15 @@ public class NotificationForm extends JDialog {
         closeButton.setBackground(HEADER_COLOR);
         closeButton.setForeground(Color.WHITE);
         closeButton.setFocusPainted(false);
-        
+
         closeButton.addActionListener(e -> {
             dispose(); // Đóng dialog
+
+            // 3️⃣ THÊM ĐOẠN NÀY: Gọi hàm reload từ file Computer
+            if (admin.View.Computer.instance != null) {
+                admin.View.Computer.instance.reloadComputerUI();
+                System.out.println("Đã gọi reload giao diện!");
+            }
         });
 
         footerPanel.add(closeButton);

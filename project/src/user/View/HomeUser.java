@@ -17,24 +17,33 @@ import admin.DAO.computerDAO;
 
 public class HomeUser extends JFrame {
 
-
     private static final Color GRADIENT_START = new Color(135, 88, 255);
     // Màu kết thúc (Xanh đậm hơn)
     private static final Color GRADIENT_END = new Color(66, 95, 235);
     private static final Color BG_COLOR = new Color(255, 251, 236);
-
 
     private JLabel lblOnlineTime, lblRemainingTime;
     private JTabbedPane tabs;
     private String ipAddress;
     private Connection connection;
     private computerDAO computerDAO;
+
     public HomeUser() {
         connect();
         try {
             ipAddress = InetAddress.getLocalHost().getHostAddress();
             connection = DatabaseConnection.getConnection();
+
+            // --- ĐOẠN CẦN SỬA ---
             SocketClient.getInstance().send("Có máy kết nối: " + ipAddress);
+
+            // Mới (Đúng): Gửi đúng cú pháp "ID:" để Server nhận diện ngay lập tức
+            String msg = "ID:" + ipAddress;
+            SocketClient.getInstance().send(msg);
+
+            System.out.println("Đã gửi lệnh update status: " + msg);
+            // --------------------
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -50,21 +59,22 @@ public class HomeUser extends JFrame {
             @Override
             public void windowClosing(java.awt.event.WindowEvent e) {
                 // Giả sử bạn có class Login, nếu chưa có hãy comment lại dòng này
-                 new Login().setVisible(true);
+                new Login().setVisible(true);
                 dispose();
             }
         });
-        
-        // Tùy chỉnh một chút cho JTabbedPane trông hiện đại hơn (nếu dùng thư viện ngoài như FlatLaf sẽ đẹp hơn)
+
+        // Tùy chỉnh một chút cho JTabbedPane trông hiện đại hơn (nếu dùng thư viện
+        // ngoài như FlatLaf sẽ đẹp hơn)
         UIManager.put("TabbedPane.selected", Color.WHITE);
-        UIManager.put("TabbedPane.contentBorderInsets", new Insets(0,0,0,0));
-        
+        UIManager.put("TabbedPane.contentBorderInsets", new Insets(0, 0, 0, 0));
+
         tabs = new JTabbedPane();
         tabs.setFont(new Font("Segoe UI", Font.BOLD, 14));
         tabs.addTab("Trang chủ", createHomeTab());
-        
-        // Tab 1: Dịch vụ (Chỉ cần add một JPanel rỗng vì ta sẽ chuyển trang ngay khi click)
 
+        // Tab 1: Dịch vụ (Chỉ cần add một JPanel rỗng vì ta sẽ chuyển trang ngay khi
+        // click)
 
         // THÊM ĐOẠN NÀY: Bắt sự kiện chuyển tab
         tabs.addChangeListener(e -> {
@@ -77,9 +87,9 @@ public class HomeUser extends JFrame {
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(this, "Không tìm thấy class ProductListUI!");
                     ex.printStackTrace();
-                }      
+                }
                 // 2. Đóng frame HomeUser hiện tại
-                this.dispose(); 
+                this.dispose();
             }
         });
 
@@ -148,7 +158,8 @@ public class HomeUser extends JFrame {
 
         panel.add(scroll, BorderLayout.CENTER);
 
-        // ------------------- NÚT CHUYỂN TỚI DỊCH VỤ (SỬ DỤNG GRADIENT BUTTON) -------------------
+        // ------------------- NÚT CHUYỂN TỚI DỊCH VỤ (SỬ DỤNG GRADIENT BUTTON)
+        // -------------------
         // Sử dụng class GradientButton tùy chỉnh ở bên dưới
         GradientButton btnGo = new GradientButton("Đi tới trang dịch vụ", 30);
         btnGo.setPreferredSize(new Dimension(400, 45)); // Nút to hơn một chút
@@ -163,12 +174,11 @@ public class HomeUser extends JFrame {
         // ========== BOTTOM CHAT ==========
         JPanel chatPanel = new JPanel(new BorderLayout());
         chatPanel.setBackground(BG_COLOR);
-        
+
         // Tạo TitledBorder với màu sắc đồng bộ
         TitledBorder chatBorder = BorderFactory.createTitledBorder(
                 new LineBorder(GRADIENT_END, 1, true), // Viền màu xanh đậm, bo tròn
-                "Chat với máy chủ"
-        );
+                "Chat với máy chủ");
         chatBorder.setTitleFont(new Font("Segoe UI", Font.BOLD, 14));
         chatBorder.setTitleColor(GRADIENT_END);
         chatPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -182,14 +192,13 @@ public class HomeUser extends JFrame {
         chatArea.setLineWrap(true);
         chatArea.setWrapStyleWord(true);
         JScrollPane chatScroll = new JScrollPane(chatArea);
-        chatScroll.setBorder(BorderFactory.createEmptyBorder(5,5,5,5)); // Padding cho text area bên trong
+        chatScroll.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // Padding cho text area bên trong
 
         JTextField chatInput = new JTextField();
         chatInput.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         chatInput.setBorder(BorderFactory.createCompoundBorder(
                 new LineBorder(new Color(200, 200, 200), 1, true),
-                BorderFactory.createEmptyBorder(5, 10, 5, 10)
-        ));
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)));
 
         // Nút Gửi cũng dùng Gradient
         GradientButton btnSend = new GradientButton("Gửi", 10);
@@ -238,20 +247,22 @@ public class HomeUser extends JFrame {
         // Viền nhẹ nhàng hơn và có bóng đổ giả (bằng border phức hợp)
         card.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(230, 230, 240), 1),
-                BorderFactory.createMatteBorder(0,0,3,0, new Color(220,220,230)) // Giả bóng đổ ở đáy
+                BorderFactory.createMatteBorder(0, 0, 3, 0, new Color(220, 220, 230)) // Giả bóng đổ ở đáy
         ));
 
         // Ảnh dịch vụ (Sử dụng ảnh placeholder nếu không có file thật)
         ImageIcon icon;
         try {
-             icon = new ImageIcon("service.png"); // Đường dẫn ảnh thật của bạn
-             if (icon.getIconWidth() == -1) throw new Exception("Image not found");
+            icon = new ImageIcon("service.png"); // Đường dẫn ảnh thật của bạn
+            if (icon.getIconWidth() == -1)
+                throw new Exception("Image not found");
         } catch (Exception e) {
             // Tạo ảnh placeholder màu xám nếu không tìm thấy file
-            java.awt.image.BufferedImage bi = new java.awt.image.BufferedImage(180, 130, java.awt.image.BufferedImage.TYPE_INT_RGB);
+            java.awt.image.BufferedImage bi = new java.awt.image.BufferedImage(180, 130,
+                    java.awt.image.BufferedImage.TYPE_INT_RGB);
             Graphics2D g2 = bi.createGraphics();
-            g2.setPaint(new Color(240,240,245));
-            g2.fillRect(0,0,180,130);
+            g2.setPaint(new Color(240, 240, 245));
+            g2.fillRect(0, 0, 180, 130);
             g2.setColor(Color.GRAY);
             g2.drawString("Image not found", 40, 65);
             g2.dispose();
@@ -260,7 +271,7 @@ public class HomeUser extends JFrame {
 
         Image img = icon.getImage().getScaledInstance(180, 130, Image.SCALE_SMOOTH);
         JLabel lblImage = new JLabel(new ImageIcon(img));
-        lblImage.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+        lblImage.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         // Header gradient (Sử dụng lại biến màu đã định nghĩa)
         JPanel header = new JPanel() {
@@ -272,8 +283,7 @@ public class HomeUser extends JFrame {
                 // Sử dụng màu hằng số
                 GradientPaint gp = new GradientPaint(
                         0, 0, GRADIENT_START,
-                        getWidth(), getHeight(), GRADIENT_END
-                );
+                        getWidth(), getHeight(), GRADIENT_END);
                 g2.setPaint(gp);
                 g2.fillRect(0, 0, getWidth(), getHeight());
             }
@@ -299,7 +309,6 @@ public class HomeUser extends JFrame {
 
         return card;
     }
-
 
     // ========== TIMER ==========
     private void startOnlineTimer() {
@@ -368,7 +377,8 @@ public class HomeUser extends JFrame {
             super.paintComponent(g);
         }
     }
-    public void connect(){
+
+    public void connect() {
         try {
             SocketClient.getInstance().connect("127.0.0.1", 8080);
         } catch (IOException e) {

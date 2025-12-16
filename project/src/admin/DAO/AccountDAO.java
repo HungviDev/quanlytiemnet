@@ -1,11 +1,15 @@
 package admin.DAO;
 
 import admin.Model.AccountModel;
+import user.DAO.ServiceDAO;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+
+import Connection.DatabaseConnection;
 
 public class AccountDAO {
 
@@ -23,7 +27,7 @@ public class AccountDAO {
         String sql = "SELECT user_id, username, password, balance, created_at FROM users";
 
         try (PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 AccountModel acc = new AccountModel(
@@ -31,8 +35,7 @@ public class AccountDAO {
                         rs.getString("username"),
                         rs.getString("password"),
                         rs.getLong("balance"),
-                        rs.getString("created_at")
-                );
+                        rs.getString("created_at"));
                 list.add(acc);
             }
 
@@ -41,7 +44,6 @@ public class AccountDAO {
         }
         return list;
     }
-
 
     public boolean insertAccount(AccountModel a) {
         String sql = "INSERT INTO users (username, password, balance, created_at) VALUES (?, ?, ?, ?)";
@@ -134,23 +136,35 @@ public class AccountDAO {
             return false;
         }
     }
-    public boolean checkStatusByUserId(int userId) {
-    String sql = "SELECT cp.status " +
-                 "FROM users us " +
-                 "JOIN computers cp ON us.user_id = cp.current_user_id " +
-                 "WHERE us.user_id = ?";
 
-    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setInt(1, userId);
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            String status = rs.getString("status");
-            return "Hoạt động".equalsIgnoreCase(status);
+    public boolean checkStatusByUserId(int userId) {
+        String sql = "SELECT cp.status " +
+                "FROM users us " +
+                "JOIN computers cp ON us.user_id = cp.current_user_id " +
+                "WHERE us.user_id = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                String status = rs.getString("status");
+                return "Hoạt động".equalsIgnoreCase(status);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return false;
     }
-    return false;
-}
+
+    public static void main(String[] args) {
+        try {
+            Connection connection = DatabaseConnection.getConnection();
+            AccountDAO acd = new AccountDAO(connection);
+            System.out.println(acd.getAllAccounts().toString());
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 
 }
