@@ -14,9 +14,11 @@ import javax.swing.border.TitledBorder;
 
 import Connection.DatabaseConnection;
 import admin.DAO.computerDAO;
+import user.DAO.AccountDAO;
+import user.Model.AccountModel;
+import admin.View.Computer;
 
 public class HomeUser extends JFrame {
-
     private static final Color GRADIENT_START = new Color(135, 88, 255);
     // Màu kết thúc (Xanh đậm hơn)
     private static final Color GRADIENT_END = new Color(66, 95, 235);
@@ -27,13 +29,15 @@ public class HomeUser extends JFrame {
     private String ipAddress;
     private Connection connection;
     private computerDAO computerDAO;
+    private AccountModel infoAccount;
+    private AccountDAO accountDAO;
 
     public HomeUser() {
         connect();
         try {
             ipAddress = InetAddress.getLocalHost().getHostAddress();
             connection = DatabaseConnection.getConnection();
-
+            accountDAO = new AccountDAO(connection);
             // --- ĐOẠN CẦN SỬA ---
             SocketClient.getInstance().send("Có máy kết nối: " + ipAddress);
 
@@ -47,6 +51,9 @@ public class HomeUser extends JFrame {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        infoAccount = Login.accountModel;
+        accountDAO.updateiduserbyip(ipAddress, infoAccount.getUserId());
+        System.out.println(infoAccount.toString());
 
         setTitle("Home User");
         setSize(1200, 700); // Tăng chiều cao một chút cho thoáng
@@ -104,8 +111,7 @@ public class HomeUser extends JFrame {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(BG_COLOR);
 
-        // ========== TOP TIME BOX (SỬ DỤNG GRADIENT PANEL) ==========
-        // Sử dụng lớp ẩn danh để ghi đè phương thức paintComponent
+
         JPanel timeBox = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -120,9 +126,7 @@ public class HomeUser extends JFrame {
             }
         };
         timeBox.setLayout(new BoxLayout(timeBox, BoxLayout.Y_AXIS));
-        // Tăng padding để trông thoáng hơn
         timeBox.setBorder(BorderFactory.createEmptyBorder(25, 0, 30, 0));
-        // Không cần setBackground vì đã tự vẽ
 
         lblOnlineTime = new JLabel("Thời gian online: 00:00:00");
         lblOnlineTime.setFont(new Font("Segoe UI", Font.BOLD, 24));

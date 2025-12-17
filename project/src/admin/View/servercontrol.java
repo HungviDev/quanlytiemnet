@@ -13,7 +13,6 @@ import javax.swing.SwingUtilities; // Cần thiết
 
 import Connection.DatabaseConnection;
 import admin.DAO.computerDAO;
-import admin.Model.computer;
 
 public class servercontrol {
 
@@ -110,8 +109,8 @@ public class servercontrol {
                     try {
                         computerDAO dao = new computerDAO(DatabaseConnection.getConnection());
                         dao.updatestatusbyip(clientId, "Rảnh");
-                        Computer.instance.reloadComputerUI();
                         System.out.println("-> Client " + clientId + " chuyển sang RẢNH");
+                        Computer.instance.reloadComputerUI();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

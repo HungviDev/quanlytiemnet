@@ -125,7 +125,6 @@ public class Computer extends JPanel {
         infoPanel.add(nameLabel);
         infoPanel.add(statusLabel);
 
-        // ACTION
         JPanel actionPanel = new JPanel(new FlowLayout());
         actionPanel.setBackground(Color.WHITE);
 
@@ -136,11 +135,42 @@ public class Computer extends JPanel {
         lockButton.setForeground(Color.WHITE);
 
         lockButton.addActionListener(e -> {
+
+            String ip = computer.getIpadress();
+
             if (computer.getStatus().equals("Đã khóa")) {
-                servercontrol.sendCommandToClient(computer.getIpadress(), "unlock");
+
+                boolean sent = servercontrol.sendCommandToClient(ip, "UNLOCK");
+
+                if (sent) {
+                    boolean updated = computerDAO.updatestatusbyip(ip, "Hoạt động");
+
+                    if (updated) {
+                        System.out.println("✅ MỞ KHÓA THÀNH CÔNG cho máy IP: " + ip);
+                    } else {
+                        System.err.println("❌ MỞ KHÓA THẤT BẠI (DB) cho IP: " + ip);
+                    }
+                } else {
+                    System.err.println("❌ CLIENT OFFLINE – Không thể mở khóa IP: " + ip);
+                }
+
             } else {
-                servercontrol.sendCommandToClient(computer.getIpadress(), "lock");
+
+                boolean sent = servercontrol.sendCommandToClient(ip, "LOCK");
+
+                if (sent) {
+                    boolean updated = computerDAO.updatestatusbyip(ip, "Đã khóa");
+
+                    if (updated) {
+                        System.out.println("🔒 KHÓA MÁY THÀNH CÔNG cho IP: " + ip);
+                    } else {
+                        System.err.println("❌ KHÓA MÁY THẤT BẠI (DB) cho IP: " + ip);
+                    }
+                } else {
+                    System.err.println("❌ CLIENT OFFLINE – Không thể khóa IP: " + ip);
+                }
             }
+
             reloadComputerUI();
         });
 

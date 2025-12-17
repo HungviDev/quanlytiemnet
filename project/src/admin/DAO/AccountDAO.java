@@ -122,9 +122,6 @@ public class AccountDAO {
         }
     }
 
-    // =========================
-    // DELETE user (theo user_id)
-    // =========================
     public boolean deleteById(int userId) {
         String sql = "DELETE FROM users WHERE user_id = ?";
 
@@ -156,15 +153,6 @@ public class AccountDAO {
         return false;
     }
 
-    public static void main(String[] args) {
-        try {
-            Connection connection = DatabaseConnection.getConnection();
-            AccountDAO acd = new AccountDAO(connection);
-            System.out.println(acd.getAllAccounts().toString());
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
+
 
 }

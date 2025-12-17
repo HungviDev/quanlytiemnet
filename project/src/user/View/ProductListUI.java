@@ -194,12 +194,13 @@ public class ProductListUI extends JFrame {
         btnClear.setBackground(new Color(230, 230, 230));
         btnClear.setForeground(Color.BLACK);
 
-        RoundedButton btnFilter = new RoundedButton("TRỞ VỀ", 20);
+        RoundedButton btnFilter = new RoundedButton("Đi tới giỏ hàng", 20);
+        btnFilter.setIcon(new ImageIcon("/img/computer.png"));
         btnFilter.setBackground(new Color(51, 153, 255));
         btnFilter.setForeground(Color.WHITE);
         btnFilter.addActionListener(e -> {
-            // new HomeUser().setVisible(true);  // Đảm bảo lớp HomeUser tồn tại
-            dispose();
+            CartUI aCartUI = new CartUI();
+            aCartUI.setVisible(true);
         });
 
         Dimension btnSize = new Dimension(110, 35);
@@ -359,12 +360,7 @@ public class ProductListUI extends JFrame {
     }
 
     private void openProductDetail(ServiceModel p) {
-        // Đảm bảo ProductDetailUI tồn tại và có hàm setProductData
-        // ProductDetailUI detail = new ProductDetailUI();
-        // detail.setProductData(p.getName(), p.getPrice(), p.getQuantityUnit(), "Mô tả
-        // sản phẩm chưa có.",p.getCategory());
-        // detail.setVisible(true);
-        // this.dispose();
+
     }
     // Thêm phương thức này vào lớp ProductListUI
 
